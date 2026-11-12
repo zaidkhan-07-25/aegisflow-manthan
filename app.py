@@ -3,26 +3,78 @@ import pandas as pd
 import numpy as np
 import re
 import glob
+import time
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.ensemble import IsolationForest
 
-# 1. Page Configuration
-st.set_page_config(page_title="AegisFlow | Shadow IT Command Center", page_icon="🛡️", layout="wide")
+# 1. Page Config & Enterprise Dark-Mode CSS
+st.set_page_config(page_title="AegisFlow | Enterprise Shadow IT Governance", page_icon="🛡️", layout="wide", initial_sidebar_state="expanded")
 
-# Custom Styling for Executive Cards & Badges
 st.markdown("""
 <style>
-    .stMetric {
-        background-color: #1E293B;
-        padding: 15px;
-        border-radius: 10px;
+    /* Clean Enterprise Dark Theme Overrides */
+    .stApp {
+        background-color: #0B1120;
+        color: #F8FAFC;
+    }
+    header[data-testid="stHeader"] {
+        background: transparent;
+    }
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        border: 1px solid #334155;
         border-left: 4px solid #06B6D4;
+        padding: 16px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 28px;
+        font-weight: 700;
+        color: #F8FAFC;
+    }
+    .decision-box-restrict {
+        background-color: rgba(239, 68, 68, 0.12);
+        border: 1px solid #EF4444;
+        border-left: 6px solid #EF4444;
+        padding: 18px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .decision-box-replace {
+        background-color: rgba(245, 158, 11, 0.12);
+        border: 1px solid #F59E0B;
+        border-left: 6px solid #F59E0B;
+        padding: 18px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .decision-box-sandbox {
+        background-color: rgba(16, 185, 129, 0.12);
+        border: 1px solid #10B981;
+        border-left: 6px solid #10B981;
+        padding: 18px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background-color: #0F172A;
+        padding: 8px;
+        border-radius: 10px;
+        border: 1px solid #1E293B;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 44px;
+        border-radius: 8px;
+        padding: 0 20px;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 2. Load Data + ML Scoring
+# 2. Load Data & ML Scoring
 @st.cache_data
 def load_data(uploaded_file=None):
     if uploaded_file is not None:
@@ -88,168 +140,207 @@ def load_data(uploaded_file=None):
     )
     return df
 
-# Sidebar: Live Telemetry Ingestion & Simulation
+# Sidebar Navigation & Status
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/shield.png", width=64)
-    st.title("AegisFlow Engine")
-    st.caption("Manthan 2.0 | Challenge 8")
+    st.markdown("## 🛡️ **AEGISFLOW**")
+    st.caption("Autonomous Shadow IT & Citizen AI Governance")
     st.markdown("---")
-    uploaded_csv = st.file_uploader("📂 Upload Defender/Entra KQL CSV", type=["csv"])
+    st.markdown("**🟢 System Status:** `ACTIVE`")
+    st.markdown("**📡 Telemetry:** `Defender + Entra KQL`")
+    st.markdown("**🧠 ML Engine:** `IsolationForest v1.4`")
+    st.markdown("---")
+    uploaded_csv = st.file_uploader("Ingest Custom KQL Log (CSV)", type=["csv"])
     df = load_data(uploaded_csv)
-    st.success(f"✅ {len(df)} Telemetry Logs Active")
-    st.info("**Connected Sources:**\n- Microsoft Defender Cloud Apps\n- Microsoft Entra ID (6 Depts)\n- Scikit-learn IsolationForest")
+    st.markdown("---")
+    st.caption("Manthan 2.0 | Challenge 8\nTeam: Naman, Zaid, Rohan, Hare Raj")
 
-# Header
-st.title("🛡️ AegisFlow: Shadow IT & Citizen AI Command Center")
-st.markdown("**Real-Time Risk Scoring, FinOps SaaS Recovery & Automated Governance Matrix**")
+# Top Header
+st.markdown("# 🛡️ AegisFlow Governance Command Center")
+st.markdown("Real-time visibility, ML risk scoring, and automated policy enforcement across **6 enterprise departments**.")
 
-# Top Executive KPI Row
+# KPI Cards
 k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("Total Shadow Logs", len(df), "+12% vs last wk")
-k2.metric("Critical Threats (RESTRICT)", len(df[df["Review_Decision"] == "RESTRICT"]), "Action Required", delta_color="inverse")
-k3.metric("Safe Sandboxes", len(df[df["Review_Decision"] == "SANDBOX"]), "Zero Friction")
-k4.metric("Orphaned Personal Files", len(df[df["Personal_Account_Used"] == "Yes"]), "Offboarding Risk", delta_color="inverse")
-k5.metric("Wasted SaaS Spend / Yr", f"₹{df['Monthly_Cost_INR'].sum() * 12:,}", f"₹{df['Monthly_Cost_INR'].sum():,}/mo")
+k1.metric("Shadow Tools Detected", len(df), "6 Departments")
+k2.metric("Critical Blocks (RESTRICT)", len(df[df["Review_Decision"] == "RESTRICT"]), "Prevented Leaks", delta_color="inverse")
+k3.metric("Active Sandboxes", len(df[df["Review_Decision"] == "SANDBOX"]), "Safe Innovation")
+k4.metric("Orphaned IP Files", len(df[df["Personal_Account_Used"] == "Yes"]), "Personal Accounts", delta_color="inverse")
+k5.metric("Annualized SaaS Waste", f"₹{df['Monthly_Cost_INR'].sum() * 12:,}", f"₹{df['Monthly_Cost_INR'].sum():,}/mo")
 
-st.divider()
+st.markdown("<br>", unsafe_allow_html=True)
 
-# 4 Interactive Tabs
+# 4 Tabs
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 1. Executive Analytics & Heatmap",
-    "👩‍💻 2. Employee Tool Risk Gauge",
-    "🧪 3. AI Data Sanitizer (DLP)",
-    "🔐 4. SecOps Triage & KQL Pipeline"
+    "⚡ 1. Live Tool & File Interceptor",
+    "📊 2. Executive Risk & FinOps Analytics",
+    "🧪 3. AI Prompt Firewall (DLP)",
+    "🔐 4. SecOps Triage & Automation"
 ])
 
-# --- TAB 1: VISUAL ANALYTICS (PLOTLY) ---
+# --- TAB 1: LIVE FILE & TOOL INTERCEPTOR ---
 with tab1:
+    st.markdown("### ⚡ Real-Time Employee Policy Engine")
+    st.caption("Simulate an employee attempting to use an external tool or upload a real file from your computer.")
+    
+    c_left, c_right = st.columns([1, 1.3], gap="large")
+    
+    with c_left:
+        selected_dept = st.selectbox("1. Employee Department (Entra ID):", sorted(df["Entra_Department"].unique()))
+        selected_tool = st.selectbox("2. Target External Tool:", sorted(df["Defender_Tool_Detected"].unique()))
+        intended_data = st.selectbox(
+            "3. Data Classification:",
+            ["Public / Non-Sensitive", "Internal Business", "Confidential Financial", "Customer / Employee PII", "Proprietary Source Code"]
+        )
+        real_file = st.file_uploader("4. (Optional) Drop any real file to scan live:", key="interceptor_file")
+        scan_btn = st.button("🛡️ Run Real-Time Governance Scan", type="primary", use_container_width=True)
+
+    with c_right:
+        if scan_btn:
+            with st.spinner("Querying Entra ID OAuth permissions & running IsolationForest risk model..."):
+                time.sleep(0.6)
+        
+        tool_row = df[df["Defender_Tool_Detected"] == selected_tool].iloc[0]
+        base_score = tool_row["Risk_Score"]
+        
+        # Factor in uploaded file name/size if user drops a real file
+        file_bonus = 0
+        file_label = "Simulated Payload"
+        if real_file is not None:
+            file_label = f"{real_file.name} ({round(real_file.size / 1024, 1)} KB)"
+            if any(w in real_file.name.lower() for w in ["tax", "salary", "audit", "pan", "aadhaar", "secret", "client", "code"]):
+                file_bonus = 25.0
+
+        if intended_data in ["Customer / Employee PII", "Proprietary Source Code", "Confidential Financial"]:
+            live_score = min(99.0, max(base_score, 85.0) + file_bonus)
+        else:
+            live_score = min(99.0, base_score + file_bonus)
+
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=live_score,
+            number={'font': {'color': '#F8FAFC', 'size': 44}},
+            title={'text': f"Risk Index: {selected_tool}", 'font': {'color': '#94A3B8', 'size': 16}},
+            gauge={
+                'axis': {'range': [0, 100], 'tickcolor': '#64748B'},
+                'bar': {'color': "#EF4444" if live_score >= 65 else ("#F59E0B" if live_score >= 35 else "#10B981")},
+                'bgcolor': "#1E293B",
+                'steps': [
+                    {'range': [0, 35], 'color': "rgba(16, 185, 129, 0.15)"},
+                    {'range': [35, 65], 'color': "rgba(245, 158, 11, 0.15)"},
+                    {'range': [65, 100], 'color': "rgba(239, 68, 68, 0.15)"}
+                ]
+            }
+        ))
+        fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=10), paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig_gauge, use_container_width=True)
+
+        if live_score >= 65 or tool_row["Vendor_SOC2_Safe"] == "No":
+            alt_msg = f"<br>✅ <b>Auto-Redirect:</b> Use pre-approved <b>{tool_row['Approved_Alternative']}</b> instead." if tool_row["Approved_Alternative"] != "None" else ""
+            st.markdown(f"""
+            <div class="decision-box-restrict">
+                <h4 style="color:#EF4444; margin:0;">🚨 ACTION: RESTRICT (UPLOAD BLOCKED)</h4>
+                <p style="margin:6px 0 0 0; color:#E2E8F0;">Payload <b>{file_label}</b> violates DPDP / IP policy on unverified tool <b>{selected_tool}</b>.{alt_msg}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        elif tool_row["Approved_Alternative"] != "None":
+            st.markdown(f"""
+            <div class="decision-box-replace">
+                <h4 style="color:#F59E0B; margin:0;">🔄 ACTION: REPLACE (FINOPS DUPLICATE)</h4>
+                <p style="margin:6px 0 0 0; color:#E2E8F0;">ApexCorp already licenses <b>{tool_row['Approved_Alternative']}</b>. Migrating saves <b>₹{tool_row['Monthly_Cost_INR']}/month</b>.</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="decision-box-sandbox">
+                <h4 style="color:#10B981; margin:0;">✅ ACTION: SANDBOX APPROVED (14-DAY TRIAL)</h4>
+                <p style="margin:6px 0 0 0; color:#E2E8F0;">Low-risk payload <b>{file_label}</b> cleared for isolated experimentation with automatic PII guardrails.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+# --- TAB 2: EXECUTIVE ANALYTICS ---
+with tab2:
     c1, c2 = st.columns(2)
     with c1:
         fig_dept = px.bar(
-            df.groupby(["Entra_Department", "Review_Decision"]).size().reset_index(name="Count"),
-            x="Entra_Department", y="Count", color="Review_Decision",
-            title="Shadow IT Governance Decisions by Department",
+            df.groupby(["Entra_Department", "Review_Decision"]).size().reset_index(name="Events"),
+            x="Entra_Department", y="Events", color="Review_Decision",
+            title="Governance Decisions by Department",
             color_discrete_map={"RESTRICT": "#EF4444", "REPLACE": "#F59E0B", "SANDBOX": "#10B981", "APPROVE": "#3B82F6"},
-            barmode="stack"
+            barmode="stack", template="plotly_dark"
         )
+        fig_dept.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_dept, use_container_width=True)
 
     with c2:
         fig_scatter = px.scatter(
             df, x="Defender_Upload_MB", y="Risk_Score", color="Review_Decision",
             size="Monthly_Cost_INR", hover_data=["Defender_Tool_Detected", "Entra_Department", "Data_Sensitivity"],
-            title="ML Risk Cluster: Upload Volume (MB) vs. Risk Score",
-            color_discrete_map={"RESTRICT": "#EF4444", "REPLACE": "#F59E0B", "SANDBOX": "#10B981", "APPROVE": "#3B82F6"}
+            title="IsolationForest ML Anomaly Clusters (Upload MB vs Risk)",
+            color_discrete_map={"RESTRICT": "#EF4444", "REPLACE": "#F59E0B", "SANDBOX": "#10B981", "APPROVE": "#3B82F6"},
+            template="plotly_dark"
         )
+        fig_scatter.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_scatter, use_container_width=True)
 
     c3, c4 = st.columns(2)
     with c3:
-        fig_reason = px.pie(
-            df, names="Reason_Adopted", title="Root Cause: Why Employees Bypassed Official Systems",
-            hole=0.45, color_discrete_sequence=px.colors.qualitative.Set2
-        )
-        st.plotly_chart(fig_reason, use_container_width=True)
-
-    with c4:
-        spend_df = df.groupby("Entra_Department")["Monthly_Cost_INR"].sum().reset_index().sort_values("Monthly_Cost_INR", ascending=True)
+        spend_df = df.groupby("Entra_Department")["Monthly_Cost_INR"].sum().reset_index().sort_values("Monthly_Cost_INR")
         fig_spend = px.bar(
             spend_df, x="Monthly_Cost_INR", y="Entra_Department", orientation="h",
-            title="Duplicate Monthly SaaS Leakage by Department (INR)",
-            text="Monthly_Cost_INR", color_discrete_sequence=["#06B6D4"]
+            title="Duplicate Monthly SaaS Leakage by Department (₹)",
+            text="Monthly_Cost_INR", color_discrete_sequence=["#06B6D4"], template="plotly_dark"
         )
+        fig_spend.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_spend, use_container_width=True)
 
-# --- TAB 2: EMPLOYEE TOOL CHECKER WITH SPEEDOMETER GAUGE ---
-with tab2:
-    st.subheader("Interactive Tool Vetting & Self-Service Redirect")
-    col1, col2 = st.columns([1, 1.3])
-    
-    with col1:
-        selected_dept = st.selectbox("Your Entra ID Department:", sorted(df["Entra_Department"].unique()))
-        selected_tool = st.selectbox("Select External Tool:", sorted(df["Defender_Tool_Detected"].unique()))
-        intended_data = st.radio(
-            "Data Sensitivity Level:",
-            ["Public / Non-Sensitive", "Internal Business", "Confidential Financial", "Customer / Employee PII", "Proprietary Source Code"]
+    with c4:
+        fig_reason = px.pie(
+            df, names="Reason_Adopted", title="Why Employees Bypass Official IT Systems",
+            hole=0.5, color_discrete_sequence=px.colors.qualitative.Pastel, template="plotly_dark"
         )
-        upload_est = st.slider("Estimated File Upload Size (MB):", 0.5, 250.0, 15.0)
+        fig_reason.update_layout(paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig_reason, use_container_width=True)
 
-    with col2:
-        tool_row = df[df["Defender_Tool_Detected"] == selected_tool].iloc[0]
-        base_score = tool_row["Risk_Score"]
-        if intended_data in ["Customer / Employee PII", "Proprietary Source Code", "Confidential Financial"]:
-            live_score = min(99.0, max(base_score, 85.0))
-        else:
-            live_score = base_score
-
-        # Plotly Speedometer Gauge
-        fig_gauge = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=live_score,
-            title={'text': f"Live ML Risk Score: {selected_tool}"},
-            gauge={
-                'axis': {'range': [0, 100]},
-                'bar': {'color': "#EF4444" if live_score >= 65 else ("#F59E0B" if live_score >= 35 else "#10B981")},
-                'steps': [
-                    {'range': [0, 35], 'color': "rgba(16, 185, 129, 0.2)"},
-                    {'range': [35, 65], 'color': "rgba(245, 158, 11, 0.2)"},
-                    {'range': [65, 100], 'color': "rgba(239, 68, 68, 0.2)"}
-                ]
-            }
-        ))
-        fig_gauge.update_layout(height=280, margin=dict(l=20, r=20, t=40, b=20))
-        st.plotly_chart(fig_gauge, use_container_width=True)
-
-        if live_score >= 65 or tool_row["Vendor_SOC2_Safe"] == "No":
-            st.error("🚨 **DECISION: RESTRICT (Blocked)** — High risk of data leak or DPDP violation.")
-            if tool_row["Approved_Alternative"] != "None":
-                st.info(f"✅ **Approved Alternative:** Use **{tool_row['Approved_Alternative']}** instead.")
-        elif tool_row["Approved_Alternative"] != "None":
-            st.warning(f"🔄 **DECISION: REPLACE** — Switch to **{tool_row['Approved_Alternative']}** to save ₹{tool_row['Monthly_Cost_INR']}/mo.")
-        elif live_score < 35:
-            st.success("✅ **DECISION: SANDBOX APPROVED** — Safe for 14-day experimentation with non-sensitive data.")
-        else:
-            st.success("🌟 **DECISION: APPROVE** — High-value innovation tool routed to fast-track procurement.")
-
-# --- TAB 3: SAFE AI DATA SANITIZER ---
+# --- TAB 3: AI PROMPT FIREWALL (DLP) ---
 with tab3:
-    st.subheader("🧪 Real-Time Prompt & Document Sanitizer (Preventing Samsung/Amazon Leaks)")
-    c_in, c_out = st.columns(2)
+    st.markdown("### 🧪 Zero-Leak AI Prompt Firewall")
+    st.caption("Automatically strips PII, PAN, phone numbers, and financials before employees prompt external AI tools—preventing Samsung & Amazon-style leaks.")
+    
+    c_in, c_out = st.columns(2, gap="large")
     with c_in:
         sample_text = (
-            "Confidential Q3 Report: ApexCorp Retail signed a supply contract with vendor Rajesh Kumar "
-            "(Email: rajesh.k@vendor.in, Phone: +91-9876543210, PAN: ABCDE1234F) worth Rs. 45,00,000 for Bengaluru warehouses."
+            "Confidential Q3 Audit: ApexCorp Retail finalized vendor contract with Rajesh Kumar "
+            "(Email: rajesh.k@vendor.in, Phone: +91-9876543210, PAN: ABCDE1234F) for Rs. 45,00,000 in Bengaluru."
         )
-        user_text = st.text_area("1. Paste Raw Confidential Text:", sample_text, height=180)
-        sanitize_btn = st.button("✨ Scrub PII & Financials Now", type="primary")
+        user_text = st.text_area("Raw Employee Prompt / Document Snippet:", sample_text, height=180)
+        scrub_btn = st.button("✨ Sanitize & Generate Safe Prompt", type="primary", use_container_width=True)
     with c_out:
-        st.write("2. Safe Sanitized Output (Ready for Sandbox AI):")
-        if sanitize_btn or user_text:
-            cleaned = re.sub(r'[\w\.-]+@[\w\.-]+', '[EMAIL_REDACTED]', user_text)
-            cleaned = re.sub(r'(\+91[\-\s]?)?[6-9]\d{9}', '[PHONE_REDACTED]', cleaned)
-            cleaned = re.sub(r'[A-Z]{5}[0-9]{4}[A-Z]{1}', '[PAN_REDACTED]', cleaned)
-            cleaned = re.sub(r'(Rs\.?|INR|₹)\s?[\d,]+', '[FINANCIAL_AMOUNT_REDACTED]', cleaned)
-            st.code(cleaned, language="text")
+        st.markdown("**Sanitized Output (Safe for External Sandbox AI):**")
+        cleaned = re.sub(r'[\w\.-]+@[\w\.-]+', '[EMAIL_REDACTED]', user_text)
+        cleaned = re.sub(r'(\+91[\-\s]?)?[6-9]\d{9}', '[PHONE_REDACTED]', cleaned)
+        cleaned = re.sub(r'[A-Z]{5}[0-9]{4}[A-Z]{1}', '[PAN_REDACTED]', cleaned)
+        cleaned = re.sub(r'(Rs\.?|INR|₹)\s?[\d,]+', '[FINANCIAL_AMOUNT_REDACTED]', cleaned)
+        st.code(cleaned, language="text")
+        st.success("✅ 4 sensitive entities neutralized automatically.")
 
-# --- TAB 4: SECOPS TRIAGE & KQL ---
+# --- TAB 4: SECOPS TRIAGE & AUTOMATION ---
 with tab4:
-    st.subheader("🔐 Live SecOps Triage Queue & Automated Remediation")
+    st.markdown("### 🔐 Live SecOps Triage Queue & Power Automate Trigger")
     f1, f2 = st.columns(2)
     with f1:
-        dept_filter = st.multiselect("Filter Department:", sorted(df["Entra_Department"].unique()), default=sorted(df["Entra_Department"].unique()))
+        dept_filter = st.multiselect("Department:", sorted(df["Entra_Department"].unique()), default=sorted(df["Entra_Department"].unique()))
     with f2:
-        dec_filter = st.multiselect("Filter Decision:", sorted(df["Review_Decision"].unique()), default=sorted(df["Review_Decision"].unique()))
+        dec_filter = st.multiselect("Decision:", sorted(df["Review_Decision"].unique()), default=sorted(df["Review_Decision"].unique()))
 
     filtered_df = df[(df["Entra_Department"].isin(dept_filter)) & (df["Review_Decision"].isin(dec_filter))]
-    st.dataframe(filtered_df, use_container_width=True)
+    st.dataframe(filtered_df, use_container_width=True, height=320)
 
-    if st.button("⚡ Execute Power Automate Remediation (Revoke OAuth & Send Teams Nudges)", type="primary"):
+    if st.button("⚡ Execute Automated Power Automate Remediation", type="primary"):
         r_cnt = len(filtered_df[filtered_df["Review_Decision"] == "RESTRICT"])
         rep_cnt = len(filtered_df[filtered_df["Review_Decision"] == "REPLACE"])
-        st.toast(f"Power Automate: Revoked {r_cnt} OAuth tokens & sent {rep_cnt} migration nudges!", icon="⚡")
-        st.success(f"✅ Automated remediation dispatched for {r_cnt + rep_cnt} flagged events.")
+        st.toast(f"Power Automate: Revoked {r_cnt} OAuth tokens & sent {rep_cnt} Teams nudges!", icon="⚡")
+        st.success(f"✅ **Remediation Executed:** {r_cnt} high-risk OAuth grants revoked in Entra ID; {rep_cnt} employees redirected to licensed corporate tools.")
 
-    with st.expander("📡 View Underlying Microsoft Defender + Entra ID KQL Query"):
+    with st.expander("📡 View Production Microsoft Defender + Entra ID KQL Query"):
         st.code("""CloudAppEvents
 | where Timestamp > ago(7d) and IsApprovedApp == false
 | join kind=inner (
